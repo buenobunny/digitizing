@@ -5,13 +5,13 @@ import random
 import argparse
 import time
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--filename", help="File name")
-parser.add_argument("-s", "--single", help="how big for a single cell")
+parser.add_argument("-n", "--filename", help="File name without extension")
+parser.add_argument("-s", "--single", help="how big for a single cell (int)")
 parser.add_argument("-d", "--display", help="should i display while doing", action=argparse.BooleanOptionalAction)
-parser.add_argument("-a", "--append", help="file name append")
-parser.add_argument("-f", "--text", help="text size")
-parser.add_argument("-b", "--baseline", help="baseline brightness")
-parser.add_argument("-u", "--subdir", help="any subdirectory")
+parser.add_argument("-a", "--append", help="file name appendage (file-1.mp4)")
+parser.add_argument("-f", "--textsize", help="text size (int)")
+parser.add_argument("-b", "--baseline", help="baseline brightness (int)")
+parser.add_argument("-u", "--subdir", help="subdirectory to I/O from")
 
 args = parser.parse_args()
 
@@ -31,7 +31,7 @@ fps = cap.get(cv2.CAP_PROP_FPS)
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-letter_size = float(args.text) if args.text is not None else .5
+letter_size = float(args.textsize) if args.textsize is not None else .5
 
 brightness_baseline = int(args.baseline) if args.baseline is not None else 10
 
