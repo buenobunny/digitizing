@@ -20,6 +20,7 @@ if args.filename is None:
 
 filename = args.filename
 
+# TODO: add support for different input codecs
 location = f"./{args.subdir}/{filename}.mp4" if args.subdir else f"{filename}.mp4"
 
 # read the file given
@@ -38,6 +39,7 @@ shouldDisplay = True if args.display is not None else False
 
 appendage = args.append if args.append is not None else ""
 
+# TODO: add support for different output codecs
 writeName = f"{filename}-digitized{appendage}.mp4"
 writeLocation = f"./{args.subdir}/{writeName}" if args.subdir else writeName
 # start a file output
@@ -45,6 +47,7 @@ output = cv2.VideoWriter(writeLocation,cv2.VideoWriter_fourcc(*'mp4v'),fps,(widt
 
 single = int(args.single) or 20
 
+# TODO: argument to take a csv file for the words
 # word choices!
 s = ["akissfromabove","onmyknees","istarttopray",
 "thoughticould","thecryingmoon","fallinginthecloud",
@@ -71,7 +74,7 @@ text = comeupwithaline()
 
 singleY = int(height/single)
 singleX = int(width/single)
-# // fucked shit to try to get random words
+# fucked shit to try to get random words
 for y in range(singleY-1):
     text = np.vstack([text, comeupwithaline()])
 
