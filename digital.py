@@ -12,6 +12,7 @@ parser.add_argument("-a", "--append", help="file name appendage (file-1.mp4)")
 parser.add_argument("-f", "--textsize", help="text size (int)")
 parser.add_argument("-b", "--baseline", help="baseline brightness (int)")
 parser.add_argument("-u", "--subdir", help="subdirectory to I/O from")
+parser.add_argument("-t", "--textfile", help="read in a text file")
 
 args = parser.parse_args()
 
@@ -48,8 +49,12 @@ output = cv2.VideoWriter(writeLocation,cv2.VideoWriter_fourcc(*'mp4v'),fps,(widt
 single = int(args.single) or 20
 
 # TODO: argument to take a csv file for the words
+def read_file_lines(filename):
+    with open(filename, 'r') as f:
+        lines = [line.rstrip('\n') for line in f]
+    return lines
 # word choices!
-s = ["akissfromabove","onmyknees","istarttopray",
+s = read_file_lines(args.textfile) if args.textfile else ["akissfromabove","onmyknees","istarttopray",
 "thoughticould","thecryingmoon","fallinginthecloud",
 ".zip",".mp3",".txt","ASSERTIONFAILED!!!",".wav",
 "whowillyoube","THECLOUD","lingersintheair","whatsonyourmind",
@@ -81,21 +86,33 @@ for y in range(singleY-1):
 scroll_rate = 2
 
 #counters to make the text mooove
+total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 frames = 0
 counter = 0
 mover = 0
+print_thresholds = [(i+1)/10 for i in range(10)]
+start_time = time.time()
+
 def count():
-    global counter, mover, frames
+    global counter, mover, frames, total_frames, print_thresholds, start_time
     if counter % scroll_rate == 0:
         mover = (mover + 1) % singleY
     counter = (counter + 1) % scroll_rate
     frames += 1
+    if len(print_thresholds) and frames/total_frames > print_thresholds[0]:
+        print_amt_left(frames, start_time, frames/total_frames)
+        print_thresholds.pop(0)
+
+
+def print_amt_left(curr_frames, start_time, percent_processed):
+    total_time = time.time() - start_time
+    remaining = (1 - percent_processed) * total_time / percent_processed
+    print(f"{percent_processed:.0%} processed in {total_time:.2f}, remaining: {remaining:.2f}")
 
 def avg_bright(frame, startX, startY):
     #get the avg rgb colors for a block starting at..
     return np.mean(frame[startY:startY + single, startX:startX + single])
 print("running, click on the frame then press q to stop")
-start_time = time.time()
 
 while (cap.isOpened()):
 
@@ -115,7 +132,7 @@ while (cap.isOpened()):
         yText = (y-mover)%singleY
         for x in range(singleX):
             startX = (x)*single
-            avg = blocks_avg[y,x-1%singleX]
+            avg = blocks_avg[y,x%singleX]
             brightness = (avg + brightness_baseline) // 80
             cv2.putText(black, text[yText,x], (startX,startY + single), 
                 cv2.FONT_HERSHEY_PLAIN, letter_size * math.log(brightness+1), (0,(brightness * 64),0), 1, cv2.LINE_AA)
