@@ -6,9 +6,9 @@ import argparse
 import time
 parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--filename", help="File name without extension")
-parser.add_argument("-s", "--single", help="how big for a single cell (int)")
+parser.add_argument("-s", "--blocksize", help="how big for a single cell (int)")
 parser.add_argument("-d", "--display", help="should i display while doing", action=argparse.BooleanOptionalAction)
-parser.add_argument("-a", "--append", help="file name appendage (file-1.mp4)")
+parser.add_argument("-a", "--append", help="file name appendage (file-<append>.mp4)")
 parser.add_argument("-f", "--textsize", help="text size (int)")
 parser.add_argument("-b", "--baseline", help="baseline brightness (int)")
 parser.add_argument("-u", "--subdir", help="subdirectory to I/O from")
@@ -46,7 +46,7 @@ writeLocation = f"./{args.subdir}/{writeName}" if args.subdir else writeName
 # start a file output
 output = cv2.VideoWriter(writeLocation,cv2.VideoWriter_fourcc(*'mp4v'),fps,(width,height))
 
-single = int(args.single) or 20
+blocksize = int(args.blocksize) or 20
 
 # TODO: argument to take a csv file for the words
 def read_file_lines(filename):
@@ -61,15 +61,14 @@ s = read_file_lines(args.textfile) if args.textfile else ["akissfromabove","onmy
 "VIRTUALMEMORIES","eyesonme!","meltingicedcoffee","BETTEREVERYDAY?",
 "onmyown"]
 
-numReps = math.ceil(width / single / len(s))
+numReps = math.ceil(width / blocksize / len(s))
 
-x_range = int(width/single)
+x_range = int(width/blocksize)
 
 def comeupwithaline():
-
     linelen = 0
     add = ""
-    while linelen - 1 < width / single:
+    while linelen - 1 < width / blocksize:
         choice = random.randint(1,len(s)-1)
         linelen += len(s[choice])
         add = add + s[choice]
@@ -77,8 +76,8 @@ def comeupwithaline():
 
 text = comeupwithaline()
 
-singleY = int(height/single)
-singleX = int(width/single)
+singleY = int(height/blocksize)
+singleX = int(width/blocksize)
 # fucked shit to try to get random words
 for y in range(singleY-1):
     text = np.vstack([text, comeupwithaline()])
@@ -103,15 +102,16 @@ def count():
         print_amt_left(frames, start_time, frames/total_frames)
         print_thresholds.pop(0)
 
+def convert(seconds):
+    min, sec = divmod(seconds, 60)
+    hour, min = divmod(min, 60)
+    return '%d:%02d:%02d' % (hour, min, sec)
 
 def print_amt_left(curr_frames, start_time, percent_processed):
     total_time = time.time() - start_time
     remaining = (1 - percent_processed) * total_time / percent_processed
-    print(f"{percent_processed:.0%} processed in {total_time:.2f}, remaining: {remaining:.2f}")
+    print(f"{percent_processed:.0%} processed in {convert(total_time)}, remaining: {convert(remaining)}")
 
-def avg_bright(frame, startX, startY):
-    #get the avg rgb colors for a block starting at..
-    return np.mean(frame[startY:startY + single, startX:startX + single])
 print("running, click on the frame then press q to stop")
 
 while (cap.isOpened()):
@@ -123,18 +123,18 @@ while (cap.isOpened()):
 
     # easier to read colors in grayscale apparently
     simple_avg = frame.mean(axis=2)
-    blocks = simple_avg.reshape(singleY, single, singleX, single)
+    blocks = simple_avg.reshape(singleY, blocksize, singleX, blocksize)
     blocks_avg = blocks.mean(axis=(1, 3))
     black = np.full((height, width, 3), 0, dtype=np.uint8)
 
     for y in range(singleY):
-        startY = (y)*single
+        startY = (y)*blocksize
         yText = (y-mover)%singleY
         for x in range(singleX):
-            startX = (x)*single
+            startX = (x)*blocksize
             avg = blocks_avg[y,x%singleX]
             brightness = (avg + brightness_baseline) // 80
-            cv2.putText(black, text[yText,x], (startX,startY + single), 
+            cv2.putText(black, text[yText,x], (startX,startY + blocksize), 
                 cv2.FONT_HERSHEY_PLAIN, letter_size * math.log(brightness+1), (0,(brightness * 64),0), 1, cv2.LINE_AA)
 
     count()
@@ -147,7 +147,7 @@ while (cap.isOpened()):
         break
 
 end_time = time.time()
-print(f"ending and releasing, avg frame time: {(end_time - start_time)/frames}")
+print(f"ending and releasing, avg frame time: {(end_time - start_time)/frames:.2f}s")
 # release the video capture object
 output.release()
 cap.release()
