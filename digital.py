@@ -13,6 +13,7 @@ parser.add_argument("-f", "--textsize", help="text size (int)")
 parser.add_argument("-b", "--baseline", help="baseline brightness (int)")
 parser.add_argument("-u", "--subdir", help="subdirectory to I/O from")
 parser.add_argument("-t", "--textfile", help="read in a text file")
+parser.add_argument("-m", "--multiplier", help="how much to multiply the brightness by, useful for adding contrast")
 
 args = parser.parse_args()
 
@@ -29,12 +30,17 @@ cap = cv2.VideoCapture(location)
 
 fps = cap.get(cv2.CAP_PROP_FPS)
 
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+blocksize = int(args.blocksize) or 20
+
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) - (cap.get(cv2.CAP_PROP_FRAME_WIDTH) % blocksize))
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) - (cap.get(cv2.CAP_PROP_FRAME_HEIGHT) % blocksize))
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
 letter_size = float(args.textsize) if args.textsize is not None else .5
 
 brightness_baseline = int(args.baseline) if args.baseline is not None else 10
+multiplier = float(args.multiplier) if args.multiplier is not None else 1
 
 shouldDisplay = True if args.display is not None else False
 
@@ -45,8 +51,6 @@ writeName = f"{filename}-digitized{appendage}.mp4"
 writeLocation = f"./{args.subdir}/{writeName}" if args.subdir else writeName
 # start a file output
 output = cv2.VideoWriter(writeLocation,cv2.VideoWriter_fourcc(*'mp4v'),fps,(width,height))
-
-blocksize = int(args.blocksize) or 20
 
 # TODO: argument to take a csv file for the words
 def read_file_lines(filename):
@@ -120,6 +124,7 @@ while (cap.isOpened()):
 
     if frame is None:
         break
+    frame = frame[:singleY*blocksize,:singleX*blocksize,:]
 
     # easier to read colors in grayscale apparently
     simple_avg = frame.mean(axis=2)
@@ -133,7 +138,7 @@ while (cap.isOpened()):
         for x in range(singleX):
             startX = (x)*blocksize
             avg = blocks_avg[y,x%singleX]
-            brightness = (avg + brightness_baseline) // 80
+            brightness = (avg + brightness_baseline) // 80 * multiplier
             cv2.putText(black, text[yText,x], (startX,startY + blocksize), 
                 cv2.FONT_HERSHEY_PLAIN, letter_size * math.log(brightness+1), (0,(brightness * 64),0), 1, cv2.LINE_AA)
 

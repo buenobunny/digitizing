@@ -42,7 +42,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 letter_size = float(args.textsize) if args.textsize is not None else .5
 
 brightness_baseline = int(args.baseline) if args.baseline is not None else 10
-multiplier = float(args.multiplier) if args.baseline is not None else 1
+multiplier = float(args.multiplier) if args.multiplier is not None else 1
 
 shouldDisplay = True if args.display is not None else False
 
