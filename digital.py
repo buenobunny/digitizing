@@ -93,7 +93,8 @@ total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 frames = 0
 counter = 0
 mover = 0
-print_thresholds = [(i+1)/10 for i in range(10)]
+num_thresholds = 20
+print_thresholds = [(i+1)/num_thresholds for i in range(num_thresholds)]
 start_time = time.time()
 
 def count():
@@ -139,6 +140,8 @@ while (cap.isOpened()):
             startX = (x)*blocksize
             avg = blocks_avg[y,x%singleX]
             brightness = (avg + brightness_baseline) // 80 * multiplier
+            if brightness == 0:
+                continue
             cv2.putText(black, text[yText,x], (startX,startY + blocksize), 
                 cv2.FONT_HERSHEY_PLAIN, letter_size * math.log(brightness+1), (0,(brightness * 64),0), 1, cv2.LINE_AA)
 
