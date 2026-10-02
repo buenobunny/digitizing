@@ -6,6 +6,11 @@ This script turns a source video into a "digitized" version of it. Example input
 pip3 install -r requirements.txt
 ```
 
+```bash
+python3 digital.py --help
+python3 beat_matched.py --help
+```
+
 ## Run an example
 The following example runs the script on the file `examples/SUNP0037.mp4` with a single cell of size 5, font size of the letters .15 and a baseline brightness of 10. `-d` shows you the render as it goes.
 ```bash
