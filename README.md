@@ -8,11 +8,12 @@ pip3 install -r requirements.txt
 
 ## Run an example
 The following example runs the script on the file `examples/SUNP0037.mp4` with a single cell of size 5, font size of the letters .15 and a baseline brightness of 10. `-d` shows you the render as it goes.
-```
+```bash
 python3 digital.py -u "examples" -n "SUNP0037" -s 5 -f .15 -b 10 -d
 ```
-```
-python3 asciify.py -u "examples" -n "SUNP0037" -s 10 -f .15 -b 0 -m 1.35 -a 1 -d
+Here's how to use the beat matched script, it is built ontop of the previous so requires all the same arguments plus a bpm and optional rate (-r, 1 = every beat, 2 = half a beat, .5 = every other)
+```bash
+python3 beat_matched.py -u "examples" -n "SUNP0037" -s 5 -f .15 -b 10 -m 1.5 -a "beat_matched" -d -p 120
 ```
 
 ## Performance characteristics 
