@@ -12,7 +12,7 @@ The following example runs the script on the file `examples/SUNP0037.mp4` with a
 python3 digital.py -u "examples" -n "SUNP0037" -s 5 -f .15 -b 10 -d
 ```
 ```
-python3 asciify.py -u "examples" -n "SUNP0037" -s 10 -f 15 -b 0 -m 1.35 -a 1 -d
+python3 asciify.py -u "examples" -n "SUNP0037" -s 10 -f .15 -b 0 -m 1.35 -a 1 -d
 ```
 
 ## Performance characteristics 

@@ -40,7 +40,7 @@ height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 if args.bpm is None:
     raise Exception("need a bpm")
 bpm = int(args.bpm)
-rate = float(args.rate)
+rate = float(args.rate) if args.rate else 1
 ms_per_beat = 60000 / bpm * (1/rate)
 
 letter_size = float(args.textsize) if args.textsize is not None else .5
